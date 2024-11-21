@@ -1,25 +1,37 @@
-import cv2
 import time
-from services.frame_processing import FrameProcessingService
+
+import cv2
 from patterns.block_structure import FrameStatus, SubBlock, Block
+from services.multi_threaded_frame_processor import MultiThreadedFrameProcessor
 
 class DetectionHandler:
-    def __init__(self, face_detector, eye_state_detector, head_pose_detector, attention_analysis_service):
-        self.processor = FrameProcessingService(face_detector, eye_state_detector, head_pose_detector)
+    def __init__(self, face_detector_model_paths, eye_state_detector, head_pose_detector, attention_analysis_service, max_threads=4):
+        self.processor = MultiThreadedFrameProcessor(
+            model_paths=face_detector_model_paths,
+            eye_state_detector=eye_state_detector,
+            head_pose_detector=head_pose_detector,
+            max_threads=max_threads
+        )
         self.attention_analysis_service = attention_analysis_service
         self.frame_statuses = []
         self.sub_blocks = []
         self.sub_block_start_time = time.time()
         self.sub_block_duration = 1
+        self.frame_id = 0
+        self.processor.start_threads()
 
     def process_frame(self, frame, ui_handler):
-        results = self.processor.process_frame(frame)
+        self.processor.add_frame(self.frame_id, frame)
+        self.frame_id += 1
+
+        results = self.processor.get_results()
         ui_handler.frame_counter.increment()
 
-        for result in results:
-            self.draw_detections(frame, result)
-            frame_status = self.determine_frame_status(result)
-            self.frame_statuses.append(frame_status)
+        for frame_id, result_list in results:
+            for result in result_list:
+                self.draw_detections(frame, result)
+                frame_status = self.determine_frame_status(result)
+                self.frame_statuses.append(frame_status)
 
         self.aggregate_sub_blocks(ui_handler)
 
@@ -70,3 +82,6 @@ class DetectionHandler:
                 ui_handler.attention_status_display.update_blocks_status(block)
 
                 self.sub_blocks = []
+
+    def stop(self):
+        self.processor.stop_threads()

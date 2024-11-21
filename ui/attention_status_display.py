@@ -1,12 +1,12 @@
-import tkinter as tk
 from tkinter import Label, Frame
+
 
 class AttentionStatusDisplay:
     def __init__(self, master):
         self.frame = Frame(master)
-        
-        self.attention_status_label = Label(self.frame, text="Attention Level: N/A")
-        self.attention_status_label.grid(row=0, column=0, sticky="w")
+
+        self.attention_status_label = Label(self.frame, text="Attention Level: N/A", font=("Arial", 12, "bold"))
+        self.attention_status_label.grid(row=0, column=0, sticky="w", pady=5)
 
         self.blocks_status_labels = []
 
@@ -14,13 +14,12 @@ class AttentionStatusDisplay:
         self.attention_status_label.config(text=f"Attention Level: {status}")
 
     def update_blocks_status(self, block):
-        if len(self.blocks_status_labels) >= 5:
+        if len(self.blocks_status_labels) >= 3:
             old_label = self.blocks_status_labels.pop(0)
             old_label.destroy()
 
-        block_status_label = Label(self.frame, text=f"Block Status: {block.status}", font=("Arial", 10, "bold"))
-        block_status_label.grid(sticky="w")  
-
+        block_status_label = Label(self.frame, text=f"Block Status: {block.status}", font=("Arial", 10))
+        block_status_label.grid(sticky="w", pady=2)
         self.blocks_status_labels.append(block_status_label)
 
         for sub_block in block.sub_blocks:

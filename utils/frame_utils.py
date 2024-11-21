@@ -30,7 +30,7 @@ def crop_face_region(frame, bbox, ad=0.6):
     face_region = frame[y_start:y_end, x_start:x_end]
     if face_region.size > 0:
         face_region = resize_frame(face_region, 64, 64)
-        save_image(face_region, "face")
+        #save_image(face_region, "face")
     return face_region
 
 def crop_eye_region(frame, eye_point, ad=0.3):
@@ -45,5 +45,5 @@ def crop_eye_region(frame, eye_point, ad=0.3):
     eye_region = frame[y_start:y_end, x_start:x_end]
     if eye_region.size > 0:
         eye_region = resize_frame(eye_region, 32, 32)
-        save_image(eye_region, "eye")
+        #save_image(eye_region, "eye")
     return eye_region
